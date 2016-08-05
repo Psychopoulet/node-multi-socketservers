@@ -5,7 +5,7 @@
 	const 	path = require("path"),
 			assert = require("assert"),
 
-      ioClient = require("socket.io-client"),
+			ioClient = require("socket.io-client"),
 
 			multiservers = require(path.join(__dirname, "..", "lib", "main.js"));
 
@@ -58,20 +58,20 @@ describe("create servers", () => {
 			name: "basic http server"
 		}).then(() => {
 
-      return servers.addServer({
-        port: 1338,
-        name: "basic http server 2"
-      });
+			return servers.addServer({
+				port: 1338,
+				name: "basic http server 2"
+			});
 
-    }).then(() => {
+		}).then(() => {
 			return servers.listen(() => { });
 		}).then(() => {
 
 			assert.strictEqual(2, servers.servers.length, "server number is incorrect");
 
-      assert.strictEqual(1337, servers.servers[0].options.port, "first server name is incorrect");
-      assert.strictEqual("basic http server", servers.servers[0].options.name, "first server name is incorrect");
-      assert.strictEqual(false, servers.servers[0].options.ssl, "first server ssl is incorrect");
+			assert.strictEqual(1337, servers.servers[0].options.port, "first server name is incorrect");
+			assert.strictEqual("basic http server", servers.servers[0].options.name, "first server name is incorrect");
+			assert.strictEqual(false, servers.servers[0].options.ssl, "first server ssl is incorrect");
 
 			assert.strictEqual(1338, servers.servers[1].options.port, "last server name is incorrect");
 			assert.strictEqual("basic http server 2", servers.servers[1].options.name, "last server name is incorrect");
@@ -87,74 +87,78 @@ describe("create servers", () => {
 
 describe("connect & disconnect", () => {
 
-  before(() => { return servers.release(); });
-  after(() => { return servers.release(); });
+	before(() => { return servers.release(); });
+	after(() => { return servers.release(); });
 
-  it("should connect & disconnect on created servers", (done) => {
+	it("should connect & disconnect on created servers", (done) => {
 
-    return servers.addServer({
-      port: 1337,
-      name: "basic http server"
-    }).then(() => {
+		return servers.addServer({
+			port: 1337,
+			name: "basic http server"
+		}).then(() => {
 
-      return servers.addServer({
-        port: 1338,
-        name: "basic http server 2"
-      });
+			return servers.addServer({
+				port: 1338,
+				name: "basic http server 2"
+			});
 
-    }).then(() => {
-      return servers.listen(() => {});
-    }).then(() => {
+		}).then(() => {
+			return servers.listen(() => {});
+		}).then(() => {
 
-      var socket = ioClient("http://localhost:1337");
+			var socket = ioClient("http://localhost:1337");
 
-      socket.on("disconnect", () => {
-        done();
-      }).on("connect", () => {
-        socket.disconnect();
-      });
+			socket.on("disconnect", () => {
+				done();
+			}).on("connect", () => {
+				socket.disconnect();
+			});
 
-    });
+		});
 
-  }).timeout(1000);
+	}).timeout(1000);
 
 });
 
-/*describe("on", () => {
+describe("on", () => {
 
-  before(() => { return servers.release(); });
-  after(() => { return servers.release(); });
+	before(() => { return servers.release(); });
+	after(() => { return servers.release(); });
 
-  it("should receive data from these servers", (done) => {
+	it("should receive data from these servers", (done) => {
 
-    return servers.addServer({
-      port: 1337,
-      name: "basic http server"
-    }).then(() => {
+		return servers.addServer({
+			port: 1337,
+			name: "basic http server"
+		}).then(() => {
 
-      return servers.addServer({
-        port: 1338,
-        name: "basic http server 2"
-      });
+			return servers.addServer({
+				port: 1338,
+				name: "basic http server 2"
+			});
 
-    }).then(() => {
-      return servers.listen(() => {});
-    }).then(() => {
+		}).then(() => {
+			return servers.listen(() => {});
+		}).then(() => {
 
-      var socket = ioClient("http://localhost:1337");
+			return servers.connection((socket) => {
 
-      return servers.connection((socket) => {
+				socket.on("newconnection", () => {
+					done();
+				});
 
-        socket.emit("newconnection");
+			});
 
-        socket.on("disconnect", () => {
-          servers.broadcast(socket, server, "disconnection");
-        });
+		}).then(() => {
 
-      });
+			var socket = ioClient("http://localhost:1337");
 
-    });
+			return socket.on("connect", () => {
+				socket.emit("newconnection");
+			});
 
-  }).timeout(1000);
+		});
 
-});*/
+	}).timeout(1000);
+
+});
