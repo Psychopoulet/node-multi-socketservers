@@ -92,7 +92,7 @@ describe("connect & disconnect", () => {
 
 	it("should connect & disconnect on created servers", (done) => {
 
-		return servers.addServer({
+		servers.addServer({
 			port: 1337,
 			name: "basic http server"
 		}).then(() => {
@@ -127,7 +127,7 @@ describe("on", () => {
 
 	it("should receive data from these servers", (done) => {
 
-		return servers.addServer({
+		servers.addServer({
 			port: 1337,
 			name: "basic http server"
 		}).then(() => {
@@ -144,6 +144,7 @@ describe("on", () => {
 			return servers.connection((socket) => {
 
 				socket.on("newconnection", () => {
+          socket.disconnect();
 					done();
 				});
 
