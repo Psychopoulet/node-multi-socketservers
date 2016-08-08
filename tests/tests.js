@@ -17,9 +17,6 @@
 
 describe("test wrong using", () => {
 
-	before(() => { return servers.release(); });
-	after(() => { return servers.release(); });
-
 	describe("connection", () => {
 
 		it("should fail on missing eventListener", () => {
@@ -42,6 +39,126 @@ describe("test wrong using", () => {
 
 			});
 
+	});
+
+	describe("emit", () => {
+
+		it("should fail on missing eventName", () => {
+
+			return servers.emit().then(() => {
+				return Promise.reject("run with missing eventName");
+			}).catch(() => {
+				return Promise.resolve();
+			});
+
+		});
+
+			it("should fail on wrong eventName", () => {
+
+				return servers.emit(false).then(() => {
+					return Promise.reject("run with wrong eventName");
+				}).catch(() => {
+					return Promise.resolve();
+				});
+
+			});
+
+	});
+
+	describe("broadcast", () => {
+
+		it("should fail on missing socket", () => {
+
+			return servers.broadcast().then(() => {
+				return Promise.reject("run with missing socket");
+			}).catch(() => {
+				return Promise.resolve();
+			});
+
+		});
+
+			it("should fail on wrong socket", () => {
+
+				return servers.broadcast(false).then(() => {
+					return Promise.reject("run with wrong socket");
+				}).catch(() => {
+					return Promise.resolve();
+				});
+
+			});
+
+		it("should fail on missing server", () => {
+
+			return servers.broadcast({}).then(() => {
+				return Promise.reject("run with missing server");
+			}).catch(() => {
+				return Promise.resolve();
+			});
+
+		});
+
+			it("should fail on wrong server", () => {
+
+				return servers.broadcast({}, false).then(() => {
+					return Promise.reject("run with wrong server");
+				}).catch(() => {
+					return Promise.resolve();
+				});
+
+			});
+
+		it("should fail on missing eventName", () => {
+
+			return servers.broadcast({}, {}).then(() => {
+				return Promise.reject("run with missing eventName");
+			}).catch(() => {
+				return Promise.resolve();
+			});
+
+		});
+
+			it("should fail on wrong server", () => {
+
+				return servers.broadcast({}, {}, false).then(() => {
+					return Promise.reject("run with wrong eventName");
+				}).catch(() => {
+					return Promise.resolve();
+				});
+
+			});
+
+	});
+
+	describe("removeAllListeners", () => {
+
+		it("should fail on missing eventName", () => {
+
+			return servers.removeAllListeners().then(() => {
+				return Promise.reject("run with missing eventName");
+			}).catch(() => {
+				return Promise.resolve();
+			});
+
+		});
+
+			it("should fail on wrong eventName", () => {
+
+				return servers.removeAllListeners(false).then(() => {
+					return Promise.reject("run with wrong eventName");
+				}).catch(() => {
+					return Promise.resolve();
+				});
+
+			});
+
+	});
+
+});
+
+describe("release", () => {
+
+	it("should release servers", () => {
+		return servers.release();
 	});
 
 });
@@ -67,7 +184,7 @@ describe("create servers", () => {
 			return servers.listen(() => { });
 		}).then(() => {
 
-			assert.strictEqual(2, servers.servers.length, "server number is incorrect");
+			assert.strictEqual(2, servers.servers.length, "servers number is incorrect");
 
 			assert.strictEqual(1337, servers.servers[0].options.port, "first server name is incorrect");
 			assert.strictEqual("basic http server", servers.servers[0].options.name, "first server name is incorrect");
@@ -106,7 +223,7 @@ describe("connect & disconnect", () => {
 			return servers.listen(() => {});
 		}).then(() => {
 
-			var socket = ioClient("http://localhost:1337");
+			let socket = ioClient("http://localhost:1337");
 
 			socket.on("disconnect", () => {
 				done();
@@ -114,9 +231,64 @@ describe("connect & disconnect", () => {
 				socket.disconnect();
 			});
 
+			return Promise.resolve();
+
 		});
 
 	}).timeout(1000);
+
+});
+
+describe("removeAllListeners", () => {
+
+	before(() => { return servers.release(); });
+	after(() => { return servers.release(); });
+
+	it("should remove all listeners from these servers", () => {
+
+		return servers.addServer({
+			port: 1337,
+			name: "basic http server"
+		}).then(() => {
+
+			return servers.addServer({
+				port: 1338,
+				name: "basic http server 2"
+			});
+
+		}).then(() => {
+			return servers.listen(() => {});
+		}).then(() => {
+
+			return servers.connection((socket) => {
+				socket.on("newconnection", () => { });
+			});
+
+		}).then(() => {
+
+			assert.strictEqual(2, servers.servers.length, "servers number is incorrect");
+			assert.strictEqual("object", typeof servers.servers[0].sockets, "server sockets object is incorrect");
+			assert.strictEqual("object", typeof servers.servers[0].sockets.sockets, "sockets manager object is incorrect");
+			assert.strictEqual("object", typeof servers.servers[0].sockets.sockets._events, "event manager object is incorrect");
+			assert.strictEqual("function", typeof servers.servers[0].sockets.sockets._events.connection, "connection event is incorrect");
+
+			return Promise.resolve();
+
+		}).then(() => {
+			return servers.removeAllListeners("connection");
+		}).then(() => {
+
+			assert.strictEqual(2, servers.servers.length, "servers number is incorrect");
+			assert.strictEqual("object", typeof servers.servers[0].sockets, "server sockets object is incorrect");
+			assert.strictEqual("object", typeof servers.servers[0].sockets.sockets, "sockets manager object is incorrect");
+			assert.strictEqual("object", typeof servers.servers[0].sockets.sockets._events, "event manager object is incorrect");
+			assert.strictEqual("undefined", typeof servers.servers[0].sockets.sockets._events.connection, "connection event is incorrect");
+
+			return Promise.resolve();
+
+		});
+
+	});
 
 });
 
@@ -144,7 +316,7 @@ describe("on", () => {
 			return servers.connection((socket) => {
 
 				socket.on("newconnection", () => {
-          socket.disconnect();
+					socket.disconnect();
 					done();
 				});
 
@@ -152,14 +324,73 @@ describe("on", () => {
 
 		}).then(() => {
 
-			var socket = ioClient("http://localhost:1337");
+			let socket = ioClient("http://localhost:1337");
 
-			return socket.on("connect", () => {
+			socket.on("connect", () => {
 				socket.emit("newconnection");
 			});
+
+			return Promise.resolve();
 
 		});
 
 	}).timeout(1000);
+
+});
+
+describe("broadcast", () => {
+
+	before(() => { return servers.release(); });
+	after(() => { return servers.release(); });
+
+	it("should receive data from one servers", (done) => {
+
+		servers.addServer({
+			port: 1337,
+			name: "basic http server"
+		}).then(() => {
+
+			return servers.addServer({
+				port: 1338,
+				name: "basic http server 2"
+			});
+
+		}).then(() => {
+			return servers.listen(() => {});
+		}).then(() => {
+
+			return servers.connection((socket, server) => {
+
+				if(1338 === server.options.port) {
+
+					servers.broadcast(socket, server, "newconnection").then(() => {
+						socket.disconnect();
+					});
+					
+				}
+				else {
+
+					socket.on("done", () => {
+						socket.disconnect();
+						done();
+					});
+
+				}
+
+			});
+
+		}).then(() => {
+
+			ioClient("http://localhost:1337").on("newconnection", function() {
+				this.emit("done");
+			}).on("connect", () => {
+				ioClient("http://localhost:1338");
+			});
+
+			return Promise.resolve();
+
+		});
+
+	}).timeout(2000);
 
 });
