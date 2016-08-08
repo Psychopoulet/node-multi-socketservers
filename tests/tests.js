@@ -204,38 +204,79 @@ describe("create servers", () => {
 
 describe("connect & disconnect", () => {
 
-	before(() => { return servers.release(); });
-	after(() => { return servers.release(); });
+	describe("reverted", () => {
 
-	it("should connect & disconnect on created servers", (done) => {
+		before(() => { return servers.release(); });
+		after(() => { return servers.release(); });
 
-		servers.addServer({
-			port: 1337,
-			name: "basic http server"
-		}).then(() => {
+		it("should connect & disconnect on created servers", (done) => {
 
-			return servers.addServer({
-				port: 1338,
-				name: "basic http server 2"
+			servers.addServer({
+				port: 1337,
+				name: "basic http server"
+			}).then(() => {
+
+				return servers.addServer({
+					port: 1338,
+					name: "basic http server 2"
+				});
+
+			}).then(() => {
+
+				let socket = ioClient("http://localhost:1337");
+
+				socket.on("disconnect", () => {
+					done();
+				}).on("connect", () => {
+					socket.disconnect();
+				});
+
+				return Promise.resolve();
+
+			}).then(() => {
+				return servers.listen(() => {});
 			});
 
-		}).then(() => {
-			return servers.listen(() => {});
-		}).then(() => {
+		}).timeout(1000);
 
-			let socket = ioClient("http://localhost:1337");
+	});
 
-			socket.on("disconnect", () => {
-				done();
-			}).on("connect", () => {
-				socket.disconnect();
+	describe("classical", () => {
+
+		before(() => { return servers.release(); });
+		after(() => { return servers.release(); });
+
+		it("should connect & disconnect on created servers", (done) => {
+
+			servers.addServer({
+				port: 1337,
+				name: "basic http server"
+			}).then(() => {
+
+				return servers.addServer({
+					port: 1338,
+					name: "basic http server 2"
+				});
+
+			}).then(() => {
+				return servers.listen(() => {});
+			}).then(() => {
+
+				let socket = ioClient("http://localhost:1337");
+
+				socket.on("disconnect", () => {
+					done();
+				}).on("connect", () => {
+					socket.disconnect();
+				});
+
+				return Promise.resolve();
+
 			});
 
-			return Promise.resolve();
+		}).timeout(1000);
 
-		});
-
-	}).timeout(1000);
+	});
 
 });
 
@@ -294,48 +335,98 @@ describe("removeAllListeners", () => {
 
 describe("on", () => {
 
-	before(() => { return servers.release(); });
-	after(() => { return servers.release(); });
+	describe("classical", () => {
 
-	it("should receive data from these servers", (done) => {
+		before(() => { return servers.release(); });
+		after(() => { return servers.release(); });
 
-		servers.addServer({
-			port: 1337,
-			name: "basic http server"
-		}).then(() => {
+		it("should receive data from these servers", (done) => {
 
-			return servers.addServer({
-				port: 1338,
-				name: "basic http server 2"
-			});
+			servers.addServer({
+				port: 1337,
+				name: "basic http server"
+			}).then(() => {
 
-		}).then(() => {
-			return servers.listen(() => {});
-		}).then(() => {
-
-			return servers.connection((socket) => {
-
-				socket.on("newconnection", () => {
-					socket.disconnect();
-					done();
+				return servers.addServer({
+					port: 1338,
+					name: "basic http server 2"
 				});
 
+			}).then(() => {
+				return servers.listen(() => {});
+			}).then(() => {
+
+				return servers.connection((socket) => {
+
+					socket.on("newconnection", () => {
+						socket.disconnect();
+						done();
+					});
+
+				});
+
+			}).then(() => {
+
+				let socket = ioClient("http://localhost:1337");
+
+				socket.on("connect", () => {
+					socket.emit("newconnection");
+				});
+
+				return Promise.resolve();
+
 			});
 
-		}).then(() => {
+		}).timeout(1000);
 
-			let socket = ioClient("http://localhost:1337");
+	});
 
-			socket.on("connect", () => {
-				socket.emit("newconnection");
+	describe("reverted", () => {
+
+		before(() => { return servers.release(); });
+		after(() => { return servers.release(); });
+
+		it("should receive data from these servers", (done) => {
+
+			servers.addServer({
+				port: 1337,
+				name: "basic http server"
+			}).then(() => {
+
+				return servers.addServer({
+					port: 1338,
+					name: "basic http server 2"
+				});
+
+			}).then(() => {
+
+				return servers.connection((socket) => {
+
+					socket.on("newconnection", () => {
+						socket.disconnect();
+						done();
+					});
+
+				});
+
+			}).then(() => {
+				return servers.listen(() => {});
+			}).then(() => {
+
+				let socket = ioClient("http://localhost:1337");
+
+				socket.on("connect", () => {
+					socket.emit("newconnection");
+				});
+
+				return Promise.resolve();
+
 			});
 
-			return Promise.resolve();
+		}).timeout(1000);
 
-		});
-
-	}).timeout(1000);
-
+	});
+	
 });
 
 describe("broadcast", () => {
