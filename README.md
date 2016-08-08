@@ -19,7 +19,7 @@ $ npm install node-multi-socketservers
 * ``` connection(function eventListener) : return Promise instance ``` eventListener((socket[ , server ]) => {})
 * ``` emit(string eventName[, mixed data]) : return Promise instance ```
 * ``` broadcast(SocketIO.Socket socket, http.Server server, string eventName, [, mixed data]) : return Promise instance ``` broadcast on all servers
-* ``` removeAllListeners(string eventName) : return Promise instance ``` remove all listener of an events for all the servers and sockets 
+* ``` removeAllListeners(string|array eventNames) : return Promise instance ``` remove all listener of an event or an array of events for all the servers and sockets 
 
 # Examples
 
