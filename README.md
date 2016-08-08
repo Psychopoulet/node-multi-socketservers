@@ -1,5 +1,5 @@
 # node-multi-socketservers
-A multi http & socket servers manager, based on node-multi-webserver
+A multi http and socket servers manager, based on node-multi-webserver
 
 # Installation
 
