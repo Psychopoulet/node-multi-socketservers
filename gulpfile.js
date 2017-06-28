@@ -3,13 +3,15 @@
 
 // deps
 
-	const	path = require("path"),
+	const path = require("path");
 
-			gulp = require("gulp"),
-			eslint = require("gulp-eslint"),
-			excludeGitignore = require("gulp-exclude-gitignore"),
-			mocha = require("gulp-mocha"),
-			plumber = require("gulp-plumber");
+	// gulp
+	const gulp = require("gulp");
+	const plumber = require("gulp-plumber");
+
+	// tests
+	const eslint = require("gulp-eslint");
+	const mocha = require("gulp-mocha");
 
 // private
 
@@ -25,10 +27,16 @@
 
 		return gulp.src(_allJSFiles)
 			.pipe(plumber())
-			.pipe(excludeGitignore())
 			.pipe(eslint({
+				"parserOptions": {
+					"ecmaVersion": 6
+				},
 				"rules": {
-					"indent": 0
+					"linebreak-style": 0,
+					"quotes": [ 1, "double" ],
+					"indent": 0,
+					// "indent": [ 2, "tab" ],
+					"semi": [ 2, "always" ]
 				},
 				"env": {
 					"node": true, "es6": true, "mocha": true
