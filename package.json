@@ -1,11 +1,12 @@
 {
   "name": "node-multi-socketservers",
-  "version": "0.2.5",
+  "version": "0.2.6",
   "description": "A multi http & socket servers manager, based on node-multi-webserver",
   "main": "lib/main.js",
   "scripts": {
     "start": "node lib/main.js",
-    "test": "gulp mocha"
+    "test": "gulp mocha",
+    "test-travis": "gulp mocha"
   },
   "pre-commit": [
     "test"
@@ -32,14 +33,16 @@
   },
   "dependencies": {
     "node-multi-webserver": "^1.2.4",
-    "socket.io": "^2.0.3"
+    "socket.io": "^2.0.4"
   },
   "devDependencies": {
-    "gulp": "^3.9.1",
-    "gulp-plumber": "^1.1.0",
-    "gulp-eslint": "^3.0.1",
-    "gulp-mocha": "^4.3.1",
-    "pre-commit": "^1.2.2"
+    "gulp": "3.9.1",
+    "gulp-plumber": "1.1.0",
+    "gulp-eslint": "4.0.0",
+    "gulp-mocha": "3.0.1",
+    "gulp-istanbul": "1.1.2",
+    "gulp-coveralls": "0.1.4",
+    "pre-commit": "1.2.2"
   },
   "homepage": "https://github.com/Psychopoulet/node-multi-socketservers#readme",
   "engines": {

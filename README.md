@@ -1,6 +1,10 @@
 # node-multi-socketservers
 A multi http and socket servers manager, based on node-multi-webserver
 
+[![Build Status](https://api.travis-ci.org/Psychopoulet/node-multi-socketservers.svg?branch=develop)](https://travis-ci.org/Psychopoulet/node-multi-socketservers)
+[![Coverage Status](https://coveralls.io/repos/github/Psychopoulet/node-multi-socketservers/badge.svg?branch=develop)](https://coveralls.io/github/Psychopoulet/node-multi-socketservers)
+[![Dependency Status](https://img.shields.io/david/Psychopoulet/node-multi-socketservers/develop.svg)](https://github.com/Psychopoulet/node-multi-socketservers)
+
 # Installation
 
 ```bash
