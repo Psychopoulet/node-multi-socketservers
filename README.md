@@ -163,7 +163,7 @@ return servers.addServer({
 # Tests
 
 ```bash
-$ gulp
+$ npm test
 ```
 
 ## License
