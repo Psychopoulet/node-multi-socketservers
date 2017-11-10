@@ -1,6 +1,9 @@
 /*
 	eslint max-nested-callbacks: [ "error", 7 ]
 */
+/*
+	eslint no-implicit-globals: 0
+*/
 
 "use strict";
 
@@ -13,11 +16,28 @@
 
 	const MultiServers = require(path.join(__dirname, "..", "lib", "main.js"));
 
+// private
+
+	// methods
+
+		/**
+		* Create socketio client
+		* @param {int} port server port
+		* @returns {socket.io-client} The socketio client
+		*/
+		function _createClient (port) {
+
+			return ioClient("http://localhost:" + port, {
+				"reconnection": false
+			});
+
+		}
+
 // tests
 
 describe("test wrong using", () => {
 
-	const servers = new MultiServers();
+	const multiServers = new MultiServers();
 
 	describe("connection", () => {
 
@@ -25,7 +45,7 @@ describe("test wrong using", () => {
 
 			return new Promise((resolve, reject) => {
 
-				servers.connection().then(() => {
+				multiServers.connection().then(() => {
 					reject(new Error("run with missing eventListener"));
 				}).catch(resolve);
 
@@ -37,7 +57,7 @@ describe("test wrong using", () => {
 
 				return new Promise((resolve, reject) => {
 
-					servers.connection("test").then(() => {
+					multiServers.connection("test").then(() => {
 						reject(new Error("run with wrong eventListener"));
 					}).catch(resolve);
 
@@ -53,7 +73,7 @@ describe("test wrong using", () => {
 
 			return new Promise((resolve, reject) => {
 
-				servers.listen().then(() => {
+				multiServers.listen().then(() => {
 					reject(new Error("run with missing requestListener"));
 				}).catch(resolve);
 
@@ -65,7 +85,7 @@ describe("test wrong using", () => {
 
 				return new Promise((resolve, reject) => {
 
-					servers.listen(false).then(() => {
+					multiServers.listen(false).then(() => {
 						reject(new Error("run with wrong requestListener"));
 					}).catch(resolve);
 
@@ -81,7 +101,7 @@ describe("test wrong using", () => {
 
 			return new Promise((resolve, reject) => {
 
-				servers.emit().then(() => {
+				multiServers.emit().then(() => {
 					reject(new Error("run with missing eventName"));
 				}).catch(resolve);
 
@@ -93,7 +113,7 @@ describe("test wrong using", () => {
 
 				return new Promise((resolve, reject) => {
 
-					servers.emit(false).then(() => {
+					multiServers.emit(false).then(() => {
 						reject(new Error("run with wrong eventName"));
 					}).catch(resolve);
 
@@ -105,7 +125,7 @@ describe("test wrong using", () => {
 
 				return new Promise((resolve, reject) => {
 
-					servers.emit("").then(() => {
+					multiServers.emit("").then(() => {
 						reject(new Error("run with empty eventName"));
 					}).catch(resolve);
 
@@ -121,7 +141,7 @@ describe("test wrong using", () => {
 
 			return new Promise((resolve, reject) => {
 
-				servers.broadcast().then(() => {
+				multiServers.broadcast().then(() => {
 					reject(new Error("run with missing socket"));
 				}).catch(resolve);
 
@@ -133,7 +153,7 @@ describe("test wrong using", () => {
 
 				return new Promise((resolve, reject) => {
 
-					servers.broadcast(false).then(() => {
+					multiServers.broadcast(false).then(() => {
 						reject(new Error("run with wrong socket"));
 					}).catch(resolve);
 
@@ -145,7 +165,7 @@ describe("test wrong using", () => {
 
 			return new Promise((resolve, reject) => {
 
-				servers.broadcast({}).then(() => {
+				multiServers.broadcast({}).then(() => {
 					reject(new Error("run with missing server"));
 				}).catch(resolve);
 
@@ -157,7 +177,7 @@ describe("test wrong using", () => {
 
 				return new Promise((resolve, reject) => {
 
-					servers.broadcast({}, false).then(() => {
+					multiServers.broadcast({}, false).then(() => {
 						reject(new Error("run with wrong server"));
 					}).catch(resolve);
 
@@ -169,7 +189,7 @@ describe("test wrong using", () => {
 
 			return new Promise((resolve, reject) => {
 
-				servers.broadcast({}, {}).then(() => {
+				multiServers.broadcast({}, {}).then(() => {
 					reject(new Error("run with missing eventName"));
 				}).catch(resolve);
 
@@ -181,7 +201,7 @@ describe("test wrong using", () => {
 
 				return new Promise((resolve, reject) => {
 
-					servers.broadcast({}, {}, false).then(() => {
+					multiServers.broadcast({}, {}, false).then(() => {
 						reject(new Error("run with wrong eventName"));
 					}).catch(resolve);
 
@@ -193,7 +213,7 @@ describe("test wrong using", () => {
 
 				return new Promise((resolve, reject) => {
 
-					servers.broadcast({}, {}, "").then(() => {
+					multiServers.broadcast({}, {}, "").then(() => {
 						reject(new Error("run with empty eventName"));
 					}).catch(resolve);
 
@@ -209,7 +229,7 @@ describe("test wrong using", () => {
 
 			return new Promise((resolve, reject) => {
 
-				servers.removeAllListeners().then(() => {
+				multiServers.removeAllListeners().then(() => {
 					reject(new Error("run with missing eventName"));
 				}).catch(resolve);
 
@@ -221,7 +241,7 @@ describe("test wrong using", () => {
 
 				return new Promise((resolve, reject) => {
 
-					servers.removeAllListeners(false).then(() => {
+					multiServers.removeAllListeners(false).then(() => {
 						reject(new Error("run with wrong eventName"));
 					}).catch(resolve);
 
@@ -235,51 +255,58 @@ describe("test wrong using", () => {
 
 describe("release", () => {
 
-	const servers = new MultiServers();
+	const multiServers = new MultiServers();
 
 	it("should release servers", () => {
-		return servers.release();
+		return multiServers.release();
 	});
 
 });
 
 describe("create servers", () => {
 
-	const servers = new MultiServers();
+	const multiServers = new MultiServers();
 
 	after(() => {
-		return servers.release();
+		return multiServers.release();
 	});
 
 	it("should create servers", () => {
 
-		return servers.addServer({
+		return multiServers.addServer({
 			"port": 1337,
 			"name": "basic http server"
 		}).then(() => {
 
-			return servers.addServer({
+			return multiServers.addServer({
 				"port": 1338,
 				"name": "basic http server 2"
 			});
 
 		}).then(() => {
 
-			return servers.listen(() => {
+			return multiServers.listen(() => {
 				// nothing to do here
 			});
 
 		}).then(() => {
 
-			assert.strictEqual(2, servers.servers.length, "servers number is incorrect");
+			// test already listening
+			return multiServers.listen(() => {
+				// nothing to do here
+			});
 
-			assert.strictEqual(1337, servers.servers[0].options.port, "first server name is incorrect");
-			assert.strictEqual("basic http server", servers.servers[0].options.name, "first server name is incorrect");
-			assert.strictEqual(false, servers.servers[0].options.ssl, "first server ssl is incorrect");
+		}).then(() => {
 
-			assert.strictEqual(1338, servers.servers[1].options.port, "last server name is incorrect");
-			assert.strictEqual("basic http server 2", servers.servers[1].options.name, "last server name is incorrect");
-			assert.strictEqual(false, servers.servers[1].options.ssl, "last server ssl is incorrect");
+			assert.strictEqual(2, multiServers.servers.length, "servers number is incorrect");
+
+			assert.strictEqual(1337, multiServers.servers[0].options.port, "first server name is incorrect");
+			assert.strictEqual("basic http server", multiServers.servers[0].options.name, "first server name is incorrect");
+			assert.strictEqual(false, multiServers.servers[0].options.ssl, "first server ssl is incorrect");
+
+			assert.strictEqual(1338, multiServers.servers[1].options.port, "last server name is incorrect");
+			assert.strictEqual("basic http server 2", multiServers.servers[1].options.name, "last server name is incorrect");
+			assert.strictEqual(false, multiServers.servers[1].options.ssl, "last server ssl is incorrect");
 
 			return Promise.resolve();
 
@@ -291,91 +318,91 @@ describe("create servers", () => {
 
 describe("connect & disconnect", () => {
 
-	describe("reverted", () => {
+	const multiServers = new MultiServers();
 
-		const servers = new MultiServers();
+	afterEach(() => {
+		return multiServers.release();
+	});
 
-		after(() => {
-			return servers.release();
-		});
+	describe("server side", () => {
 
-		it("should connect & disconnect on created servers", (done) => {
+		it("should connect & disconnect on created servers", () => {
 
-			servers.addServer({
+			return multiServers.addServer({
 				"port": 1337,
 				"name": "basic http server"
 			}).then(() => {
 
-				return servers.addServer({
+				return multiServers.addServer({
 					"port": 1338,
 					"name": "basic http server 2"
 				});
 
 			}).then(() => {
 
-				const socket = ioClient("http://localhost:1337");
-
-				socket.on("disconnect", () => {
-					done();
-				}).on("connect", () => {
-					socket.disconnect();
+				return multiServers.listen(() => {
+					// nothing to do here
 				});
-
-				return Promise.resolve();
 
 			}).then(() => {
 
-				return servers.listen(() => {
-					// nothing to do here
+				return multiServers.connection((socket) => {
+					socket.disconnect();
+				});
+
+			}).then(() => {
+
+				return new Promise((resolve) => {
+					_createClient(1337).on("disconnect", resolve);
 				});
 
 			});
 
-		}).timeout(1000);
+		});
 
 	});
 
-	describe("classical", () => {
-
-		const servers = new MultiServers();
-
-		after(() => {
-			return servers.release();
-		});
+	describe("client side", () => {
 
 		it("should connect & disconnect on created servers", (done) => {
 
-			servers.addServer({
+			multiServers.addServer({
 				"port": 1337,
 				"name": "basic http server"
 			}).then(() => {
 
-				return servers.addServer({
+				return multiServers.addServer({
 					"port": 1338,
 					"name": "basic http server 2"
 				});
 
 			}).then(() => {
 
-				return servers.listen(() => {
+				return multiServers.listen(() => {
 					// nothing to do here
 				});
 
 			}).then(() => {
 
-				const socket = ioClient("http://localhost:1337");
+				return multiServers.connection((socket) => {
 
-				socket.on("disconnect", () => {
-					done();
-				}).on("connect", () => {
+					socket.on("disconnect", () => {
+						done();
+					});
+
+				});
+
+			}).then(() => {
+
+				const socket = _createClient(1337);
+
+				socket.on("connect", () => {
 					socket.disconnect();
 				});
 
-				return Promise.resolve();
+			}).catch(done);
 
-			});
-
-		}).timeout(1000);
+		});
 
 	});
 
@@ -385,55 +412,73 @@ describe("removeAllListeners", () => {
 
 	describe("global events", () => {
 
-		const servers = new MultiServers();
+		const multiServers = new MultiServers();
 
 		after(() => {
-			return servers.release();
+			return multiServers.release();
+		});
+
+		it("should remove all inexistant listener", () => {
+			return multiServers.removeAllListeners("test");
+		});
+
+		it("should remove all inexistant listeners", () => {
+			return multiServers.removeAllListeners([ "test" ]);
 		});
 
 		it("should remove all listeners from these servers", () => {
 
-			return servers.addServer({
+			return multiServers.addServer({
 				"port": 1337,
 				"name": "basic http server"
 			}).then(() => {
 
-				return servers.addServer({
+				return multiServers.addServer({
 					"port": 1338,
 					"name": "basic http server 2"
 				});
 
 			}).then(() => {
 
-				return servers.listen(() => {
+				return multiServers.listen(() => {
 					// nothing to do here
 				});
 
 			}).then(() => {
 
-				return servers.connection(() => {
+				return multiServers.connection(() => {
 					// nothing to do here
 				});
 
 			}).then(() => {
 
-				assert.strictEqual(2, servers.servers.length, "servers number is incorrect");
-				assert.strictEqual("object", typeof servers.servers[0].sockets, "server sockets object is incorrect");
-				assert.strictEqual("object", typeof servers.servers[0].sockets.sockets, "sockets manager object is incorrect");
-				assert.strictEqual("object", typeof servers.servers[0].sockets.sockets._events, "event manager object is incorrect");
-				assert.strictEqual("function", typeof servers.servers[0].sockets.sockets._events.connection, "connection event is incorrect");
+				assert.strictEqual(2, multiServers.servers.length, "servers number is incorrect");
+				assert.strictEqual("object", typeof multiServers.servers[0].sockets, "server sockets object is incorrect");
+				assert.strictEqual("object", typeof multiServers.servers[0].sockets.sockets, "sockets manager object is incorrect");
+				assert.strictEqual("object", typeof multiServers.servers[0].sockets.sockets._events, "event manager object is incorrect");
+
+				assert.strictEqual(
+					"function",
+					typeof multiServers.servers[0].sockets.sockets._events.connection,
+					"connection event is incorrect"
+				);
 
 				return Promise.resolve();
 
 			}).then(() => {
-				return servers.removeAllListeners("connection");
+				return multiServers.removeAllListeners("connection");
 			}).then(() => {
 
-				assert.strictEqual(2, servers.servers.length, "servers number is incorrect");
-				assert.strictEqual("object", typeof servers.servers[0].sockets, "server sockets object is incorrect");
-				assert.strictEqual("object", typeof servers.servers[0].sockets.sockets, "sockets manager object is incorrect");
-				assert.strictEqual("object", typeof servers.servers[0].sockets.sockets._events, "event manager object is incorrect");
-				assert.strictEqual("undefined", typeof servers.servers[0].sockets.sockets._events.connection, "connection event is incorrect");
+				assert.strictEqual(2, multiServers.servers.length, "servers number is incorrect");
+				assert.strictEqual("object", typeof multiServers.servers[0].sockets, "server sockets object is incorrect");
+				assert.strictEqual("object", typeof multiServers.servers[0].sockets.sockets, "sockets manager object is incorrect");
+				assert.strictEqual("object", typeof multiServers.servers[0].sockets.sockets._events, "event manager object is incorrect");
+
+				assert.strictEqual(
+					"undefined",
+					typeof multiServers.servers[0].sockets.sockets._events.connection,
+					"connection event is incorrect"
+				);
 
 				return Promise.resolve();
 
@@ -445,33 +490,33 @@ describe("removeAllListeners", () => {
 
 	describe("removed events", () => {
 
-		const servers = new MultiServers();
+		const multiServers = new MultiServers();
 
 		after(() => {
-			return servers.release();
+			return multiServers.release();
 		});
 
 		it("should remove all listeners from the sockets", (done) => {
 
-			servers.addServer({
+			multiServers.addServer({
 				"port": 1337,
 				"name": "basic http server"
 			}).then(() => {
 
-				return servers.addServer({
+				return multiServers.addServer({
 					"port": 1338,
 					"name": "basic http server 2"
 				});
 
 			}).then(() => {
 
-				return servers.listen(() => {
+				return multiServers.listen(() => {
 					// nothing to do here
 				});
 
 			}).then(() => {
 
-				return servers.connection((socket) => {
+				return multiServers.connection((socket) => {
 
 					socket.on("disconnect", () => {
 						done();
@@ -483,7 +528,7 @@ describe("removeAllListeners", () => {
 
 						socket.removeAllListeners("test1");
 
-						servers.removeAllListeners("test2").then(() => {
+						multiServers.removeAllListeners("test2").then(() => {
 							socket.emit("answer");
 						});
 
@@ -493,23 +538,26 @@ describe("removeAllListeners", () => {
 
 			}).then(() => {
 
-				const socketClient = ioClient("http://localhost:1337");
+				return new Promise((resolve) => {
 
-				socketClient.on("connect", () => {
-					socketClient.emit("query");
-				}).on("answer", () => {
+					const socketClient = _createClient(1337);
 
-					socketClient.emit("test1");
-					socketClient.emit("test2");
-					socketClient.emit("test3");
+					socketClient.on("connect", () => {
+						socketClient.emit("query");
+						resolve();
+					}).on("answer", () => {
+
+						socketClient.emit("test1");
+						socketClient.emit("test2");
+						socketClient.emit("test3");
+
+					});
 
 				});
 
-				return Promise.resolve();
-
 			});
 
-		});
+		}).timeout(1000);
 
 	});
 
@@ -517,40 +565,40 @@ describe("removeAllListeners", () => {
 
 describe("emit", () => {
 
-	const servers = new MultiServers();
+	const multiServers = new MultiServers();
 
 	after(() => {
-		return servers.release();
+		return multiServers.release();
 	});
 
 	it("should send data to the clients", (done) => {
 
-		servers.addServer({
+		multiServers.addServer({
 			"port": 1337,
 			"name": "basic http server"
 		}).then(() => {
 
-			return servers.addServer({
+			return multiServers.addServer({
 				"port": 1338,
 				"name": "basic http server 2"
 			});
 
 		}).then(() => {
 
-			return servers.listen(() => {
+			return multiServers.listen(() => {
 				// nothing to do here
 			});
 
 		}).then(() => {
 
-			return servers.connection((socket) => {
+			return multiServers.connection((socket) => {
 
 				socket.on("disconnect", () => {
 					done();
 				}).on("query", () => {
 
-					servers.emit("answertest", "test").then(() => {
-						return servers.emit("answer");
+					multiServers.emit("answertest", "test").then(() => {
+						return multiServers.emit("answer");
 					});
 
 				});
@@ -559,13 +607,16 @@ describe("emit", () => {
 
 		}).then(() => {
 
-			const socketClient = ioClient("http://localhost:1337");
+			return new Promise((resolve) => {
 
-			socketClient.on("answer", socketClient.disconnect).on("connect", () => {
-				socketClient.emit("query");
+				const socketClient = _createClient(1337);
+
+				socketClient.on("answer", socketClient.disconnect).on("connect", () => {
+					socketClient.emit("query");
+					resolve();
+				});
+
 			});
-
-			return Promise.resolve();
 
 		});
 
@@ -577,33 +628,33 @@ describe("on", () => {
 
 	describe("classical", () => {
 
-		const servers = new MultiServers();
+		const multiServers = new MultiServers();
 
 		after(() => {
-			return servers.release();
+			return multiServers.release();
 		});
 
 		it("should receive data from these servers", (done) => {
 
-			servers.addServer({
+			multiServers.addServer({
 				"port": 1337,
 				"name": "basic http server"
 			}).then(() => {
 
-				return servers.addServer({
+				return multiServers.addServer({
 					"port": 1338,
 					"name": "basic http server 2"
 				});
 
 			}).then(() => {
 
-				return servers.listen(() => {
+				return multiServers.listen(() => {
 					// nothing to do here
 				});
 
 			}).then(() => {
 
-				return servers.connection((socket) => {
+				return multiServers.connection((socket) => {
 
 					socket.on("disconnect", () => {
 						done();
@@ -613,13 +664,16 @@ describe("on", () => {
 
 			}).then(() => {
 
-				const socketClient = ioClient("http://localhost:1337");
+				return new Promise((resolve) => {
 
-				socketClient.on("connect", () => {
-					socketClient.emit("query");
+					const socketClient = _createClient(1337);
+
+					socketClient.on("connect", () => {
+						socketClient.emit("query");
+						resolve();
+					});
+
 				});
-
-				return Promise.resolve();
 
 			});
 
@@ -629,27 +683,27 @@ describe("on", () => {
 
 	describe("reverted", () => {
 
-		const servers = new MultiServers();
+		const multiServers = new MultiServers();
 
 		after(() => {
-			return servers.release();
+			return multiServers.release();
 		});
 
 		it("should receive data from these servers", (done) => {
 
-			servers.addServer({
+			multiServers.addServer({
 				"port": 1337,
 				"name": "basic http server"
 			}).then(() => {
 
-				return servers.addServer({
+				return multiServers.addServer({
 					"port": 1338,
 					"name": "basic http server 2"
 				});
 
 			}).then(() => {
 
-				return servers.connection((socket) => {
+				return multiServers.connection((socket) => {
 
 					socket.on("disconnect", () => {
 						done();
@@ -659,19 +713,22 @@ describe("on", () => {
 
 			}).then(() => {
 
-				return servers.listen(() => {
+				return multiServers.listen(() => {
 					// nothing to do here
 				});
 
 			}).then(() => {
 
-				const socketClient = ioClient("http://localhost:1337");
+				return new Promise((resolve) => {
 
-				socketClient.on("connect", () => {
-					socketClient.emit("query");
+					const socketClient = _createClient(1337);
+
+					socketClient.on("connect", () => {
+						socketClient.emit("query");
+						resolve();
+					});
+
 				});
-
-				return Promise.resolve();
 
 			});
 
@@ -683,38 +740,42 @@ describe("on", () => {
 
 describe("broadcast", () => {
 
-	const servers = new MultiServers();
+	const multiServers = new MultiServers();
 
 	after(() => {
-		return servers.release();
+		return multiServers.release();
 	});
 
 	it("should receive data from one servers", (done) => {
 
-		servers.addServer({
+		multiServers.addServer({
 			"port": 1337,
 			"name": "basic http server"
 		}).then(() => {
 
-			return servers.addServer({
+			return multiServers.addServer({
 				"port": 1338,
 				"name": "basic http server 2"
 			});
 
 		}).then(() => {
 
-			return servers.listen(() => {
+			return multiServers.listen(() => {
 				// nothing to do here
 			});
 
 		}).then(() => {
 
-			return servers.connection((socket, server) => {
+			return multiServers.connection((socket, server) => {
 
 				if (1338 === server.options.port) {
 
-					servers.broadcast(socket, server, "answer").then(() => {
-						socket.disconnect();
+					multiServers.broadcast(socket, server, "testwithdata", false).then(() => {
+
+						return multiServers.broadcast(socket, server, "answer").then(() => {
+							socket.disconnect();
+						});
+
 					});
 
 				}
@@ -730,15 +791,83 @@ describe("broadcast", () => {
 
 		}).then(() => {
 
-			const socketClient = ioClient("http://localhost:1337");
+			return new Promise((resolve) => {
 
-			socketClient.on("connect", () => {
-				ioClient("http://localhost:1338");
-			}).on("answer", () => {
-				socketClient.disconnect();
+				const socketClient = _createClient(1337);
+
+				socketClient.on("connect", () => {
+
+					_createClient(1338);
+
+					resolve();
+
+				}).on("answer", () => {
+					socketClient.disconnect();
+				});
+
 			});
 
-			return Promise.resolve();
+		});
+
+	}).timeout(1000);
+
+});
+
+describe("close", () => {
+
+	const multiServers = new MultiServers();
+
+	afterEach(() => {
+		return multiServers.release();
+	});
+
+	it("should close server without connection", () => {
+
+		return multiServers.addServer({
+			"port": 1337,
+			"name": "basic http server"
+		}).then(() => {
+
+			return multiServers.listen(() => {
+				// nothing to do here
+			});
+
+		}).then(() => {
+
+			return multiServers.connection(() => {
+				// nothing to do here
+			});
+
+		}).then(() => {
+			return multiServers.release();
+		});
+
+	}).timeout(2000);
+
+	it("should close server with connection", () => {
+
+		return multiServers.addServer({
+			"port": 1337,
+			"name": "basic http server"
+		}).then(() => {
+
+			return multiServers.listen(() => {
+				// nothing to do here
+			});
+
+		}).then(() => {
+
+			return multiServers.connection(() => {
+				multiServers.release();
+			});
+
+		}).then(() => {
+
+			return new Promise((resolve) => {
+
+				_createClient(1337).on("disconnect", resolve);
+
+			});
 
 		});
 

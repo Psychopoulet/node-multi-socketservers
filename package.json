@@ -1,6 +1,6 @@
 {
   "name": "node-multi-socketservers",
-  "version": "0.2.7",
+  "version": "0.2.8",
   "description": "A multi http & socket servers manager, based on node-multi-webserver",
   "main": "lib/main.js",
   "scripts": {
@@ -31,7 +31,7 @@
     "url": "https://github.com/Psychopoulet/node-multi-socketservers/issues"
   },
   "dependencies": {
-    "node-multi-webserver": "^1.2.5",
+    "node-multi-webserver": "^1.2.6",
     "socket.io": "^2.0.4"
   },
   "devDependencies": {
