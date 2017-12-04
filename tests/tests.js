@@ -770,12 +770,12 @@ describe("broadcast", () => {
 
 				if (1338 === server.options.port) {
 
-					multiServers.broadcast(socket, server, "testwithdata", false).then(() => {
-
-						return multiServers.broadcast(socket, server, "answer").then(() => {
-							socket.disconnect();
-						});
-
+					multiServers.broadcast(socket, server, "testwithonedata", false).then(() => {
+						return multiServers.broadcast(socket, server, "testwithmultipledata", false, true);
+					}).then(() => {
+						return multiServers.broadcast(socket, server, "answer");
+					}).then(() => {
+						socket.disconnect();
 					});
 
 				}
