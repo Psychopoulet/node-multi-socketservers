@@ -1,6 +1,6 @@
 {
   "name": "node-multi-socketservers",
-  "version": "0.2.10",
+  "version": "0.2.11",
   "description": "A multi http & socket servers manager, based on node-multi-webserver",
   "main": "lib/main.js",
   "scripts": {
